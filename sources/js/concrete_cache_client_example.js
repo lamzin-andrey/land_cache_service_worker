@@ -22,6 +22,17 @@ class ConcreteCacheClientExample extends LandCacheClient {
 	showFirstCachingCompleteMessage() {
 	        //alert('All resources loaded, add us page on main screen and use it offline.');
 	}
+	/**
+	 * @override For example, you not want cache all requests with '.json' jn end
+	 * @return Object {type:Dtring, data:Array} List of resources, which no need cache. For example ['*.json', '/breaking_news.php']
+	 * For progressive web
+	*/
+	getExcludeFilterList() {
+		let o = new Object();
+		o.type = 'filterlist';
+		o.data = ['*.json'];
+		return o;
+	}
 }
 
 export default ConcreteCacheClientExample;
