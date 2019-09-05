@@ -62,13 +62,13 @@ self.lastModUrlList = {};
 */
 self.contentLengthUrlList = {};
 
-self.verbose = true;
+self.verbose = false;
 
 
 /**
  * @description Перехватываем запрос
 */
-function onFetch(event) {ъ
+function onFetch(event) {
 	sendMessageAllClients('getmefilter');
 	//Если url входит в список таких, что их не надо кэшировать, не кэшируем
 	if (self.isPersistExcludeUrl(event.request.url)) {
@@ -308,6 +308,7 @@ function sendMessageAllClients(sType, sUpdUrl) {
 */
 function onPostMessage(info) {
 	if (info.data.type == 'filterlist') {
+		if (self.verbose) console.log('Set filter ',  info.data.data);
 		self._persistExcludeList = info.data.data;
 		return;
 	}
@@ -333,12 +334,16 @@ function onPostMessage(info) {
  */
 function isPersistExcludeUrl(url) {
 	if (self._persistExcludeList instanceof Array) {
-		let i, s, q;
+		let i, s, q, a = url.split('?');
+		url = a[0];
 		for (i = 0; i < self._persistExcludeList.length; i++) {
 			s = self._persistExcludeList[i];
 			if (s.indexOf('*') == 0) {
+				if (self.verbose) console.log('isMask!', s);
 				s = s.replace('*', '');
 				q = url.substr(url.length - s.length, s.length);
+				if (self.verbose) console.log('s', s);
+				if (self.verbose) console.log('q', q);
 				if (q == s) {
 					return true;
 				}
@@ -347,5 +352,6 @@ function isPersistExcludeUrl(url) {
 			}
 		}
 	}
+	if (self.verbose) console.log('return false for url ' + url + ', list:', self._persistExcludeList);
 	return false;
 }

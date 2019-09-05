@@ -25,7 +25,7 @@ class LandCacheClient {
 	*/
 	init() {
 		let o = this;
-		o.verbose = true;
+		o.verbose = false;
 		//Заполняется url которые есть на странице и указывают на данный сайт. Заполнение происходит в getAllResources
 		o._aUrlMap = {};
 		if (navigator.serviceWorker) {
