@@ -25,12 +25,15 @@ class LandCacheClient {
 	*/
 	init() {
 		let o = this;
-		o.verbose = false;
+		o.verbose = true;
 		//Заполняется url которые есть на странице и указывают на данный сайт. Заполнение происходит в getAllResources
 		o._aUrlMap = {};
-		navigator.serviceWorker.addEventListener('message', info => {
-			o.onMessage(info);
-		});
+		if (navigator.serviceWorker) {
+			navigator.serviceWorker.addEventListener('message', info => {
+				o.onMessage(info);
+			});
+			o.setExcludeFilter();
+		}
 	}
 	/**
 	 * @description Проверит, не пусто ли _aUrlMap если пуста, вызовет getAllResources
@@ -156,7 +159,9 @@ class LandCacheClient {
 	onMessage(info) { 
 		var o = this;
 		if (o.verbose) console.log('LandCacheClient OnMessage:', info);
-		
+		if (info.data.type == 'getmefilter') {
+			o.setExcludeFilter();
+		}
 		if (info.data.type == 'isFirstRun') {
 			if (o.verbose) console.log('LandCacheClient OnMessage: got event FirstRun! ');
 			if (window.landCacheWorker) {
@@ -189,6 +194,27 @@ class LandCacheClient {
 	showFirstCachingCompleteMessage() {
 		alert('All resources loaded, add us page on main screen and use it offline.');
 	}
+	/**
+	 * @description Send list resources to serviceworker, which will be exclude frim cache (for example ['*.json'])
+	 * For progressive web
+	*/
+	setExcludeFilter() {
+		if (window.landCacheWorker) {
+			window.landCacheWorker.postMessage(this.getExcludeFilterList());
+		}
+	}
+	/**
+	 * @override in child
+	 * @return Object {type:Dtring, data:Array} List of resources, which no need cache. For example ['*.json', '/breaking_news.php']
+	 * For progressive web
+	*/
+	getExcludeFilterList() {
+		let o = new Object();
+		o.type = 'filterlist';
+		o.data = [];
+		return o;
+	}
+	
 }
 
 export default LandCacheClient;

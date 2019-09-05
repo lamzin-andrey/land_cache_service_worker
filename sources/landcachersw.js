@@ -62,13 +62,19 @@ self.lastModUrlList = {};
 */
 self.contentLengthUrlList = {};
 
-self.verbose = false;
+self.verbose = true;
 
 
 /**
  * @description Перехватываем запрос
 */
-function onFetch(event) {
+function onFetch(event) {ъ
+	sendMessageAllClients('getmefilter');
+	//Если url входит в список таких, что их не надо кэшировать, не кэшируем
+	if (self.isPersistExcludeUrl(event.request.url)) {
+		if (self.verbose) console.log('skip url ' + event.request.url + ' because Persis Filter!');
+		return;
+	}
 	//Если его не нашли в кэше, значит надо отправить запрос на сервер, то есть кормить собак и ничего не трогать
 	if (self.excludeUrlList[event.request.url]) {
 		if (self.verbose) console.log('Skip search in cache ' + event.request.url);
@@ -301,6 +307,10 @@ function sendMessageAllClients(sType, sUpdUrl) {
  * @param {Object} {data, origin} info
 */
 function onPostMessage(info) {
+	if (info.data.type == 'filterlist') {
+		self._persistExcludeList = info.data.data;
+		return;
+	}
 	//Кэшируем переданные ресурсы
 	caches.open(CACHE).then((cache) => {
 		self.isFirstRunMode = 1;//Чтобы в update было можно понять, что происходит первое кэширование (чтобы иметь возможность сообщить об его успехе)
@@ -315,4 +325,27 @@ function onPostMessage(info) {
 			update(cache, info.data[i]);
 		}
 	});
+}
+/**
+ * @description Проверяет, не входит ли url в список таких, что не надо кэшировать
+ * @param {String} url 
+ * @return Boolean
+ */
+function isPersistExcludeUrl(url) {
+	if (self._persistExcludeList instanceof Array) {
+		let i, s, q;
+		for (i = 0; i < self._persistExcludeList.length; i++) {
+			s = self._persistExcludeList[i];
+			if (s.indexOf('*') == 0) {
+				s = s.replace('*', '');
+				q = url.substr(url.length - s.length, s.length);
+				if (q == s) {
+					return true;
+				}
+			} else if (s == url){
+				return true;
+			}
+		}
+	}
+	return false;
 }
