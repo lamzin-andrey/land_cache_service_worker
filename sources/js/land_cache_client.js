@@ -179,6 +179,7 @@ class LandCacheClient {
 		}
 		if (info.data.type == 'firstRunResourcesComplete' && info.data.updUrl == location.href) {
 			o.showFirstCachingCompleteMessage();
+			o.setExcludeFilter();
 		}
 	}
 	/**
