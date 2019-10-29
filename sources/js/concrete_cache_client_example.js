@@ -30,7 +30,7 @@ class ConcreteCacheClientExample extends LandCacheClient {
 	getExcludeFilterList() {
 		let o = new Object();
 		o.type = 'filterlist';
-		o.data = ['*.json'];
+		o.data = ['*.json', this.schemeHost() + '/pagenocache.html'];
 		return o;
 	}
 }
