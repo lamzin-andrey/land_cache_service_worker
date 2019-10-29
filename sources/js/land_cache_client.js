@@ -215,7 +215,17 @@ class LandCacheClient {
 		o.data = [];
 		return o;
 	}
-	
+	/**
+	 * @description Return substring http[s]://[sub.]host.name
+	 * @return String
+	*/
+	schemeHost(){
+		let a = window.location.href.split('/'), i, aB = [];
+		for (i = 0; i < 3; i++) {
+			aB.push(a[i]);
+		}
+		return aB.join('/');
+	}
 }
 
 export default LandCacheClient;
