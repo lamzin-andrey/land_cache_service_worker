@@ -352,7 +352,7 @@ function isPersistExcludeUrl(url) {
 		for (i = 0; i < self._persistExcludeList.length; i++) {
 			s = self._persistExcludeList[i];
 			if (s.indexOf('*') == 0) {
-				if (self.verbose) console.log('isMask!', s);
+				if (self.verbose) console.log('startMask!', s);
 				s = s.replace('*', '');
 				q = url.substr(url.length - s.length, s.length);
 				if (self.verbose) console.log('s', s);
@@ -360,6 +360,8 @@ function isPersistExcludeUrl(url) {
 				if (q == s) {
 					return true;
 				}
+			} else if (~s.indexOf('*')) {
+				return self.checkMask(s, url);
 			} else if (s == url){
 				return true;
 			}
@@ -367,4 +369,22 @@ function isPersistExcludeUrl(url) {
 	}
 	if (self.verbose) console.log('return false for url ' + url + ', list:', self._persistExcludeList);
 	return false;
+}
+/***
+ * @description Вернёт true если sRequestUrl соответствует sUrlRule. 
+ * @param {String} sUrlRule правило, например https:/host.com/a/b/* или https:/host.com/a/b/ * /er/d/* но не * /a/b/c
+ * @param {String} sRequestUrl запрошенный браузером url
+ * @return Boolean
+*/
+function checkMask(sUrlRule, sRequestUrl, ){
+	let a = sUrlRule.split('*'), i;
+	if (sRequestUrl.indexOf(a[0]) != 0) {
+		return false;
+	}
+	for (i = 1; i < a.length; i++) {
+		if (!~sRequestUrl.indexOf(a[i])) {
+			return false;
+		}
+	}
+	return true;
 }
